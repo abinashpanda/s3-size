@@ -37,6 +37,10 @@ func main() {
 				Usage: "use ssl for connecting to s3",
 				Value: false,
 			},
+			&cli.IntFlag{
+				Name:  "max-depth",
+				Usage: "max depth for showing the files size",
+			},
 		},
 		Action: func(ctx *cli.Context) error {
 			err := showSize(s3Config{
@@ -45,6 +49,7 @@ func main() {
 				SecretKey: ctx.String("secret-key"),
 				UseSSL:    ctx.Bool("use-ssl"),
 				Bucket:    ctx.String("bucket"),
+				MaxDepth:  ctx.Int("max-depth"),
 			})
 			return err
 		},

@@ -16,6 +16,7 @@ type s3Config struct {
 	AccessKey string
 	SecretKey string
 	UseSSL    bool
+	MaxDepth  int
 }
 
 const (
@@ -47,9 +48,9 @@ func showSize(config s3Config) error {
 			return object.Err
 		}
 
+		sizeMap[root] += object.Size
 		path := strings.Split(object.Key, "/")
 		for i := 0; i < len(path); i++ {
-			sizeMap[root] += object.Size
 			name := strings.Join(path[:i+1], "/")
 			if _, ok := sizeMap[name]; !ok {
 				sizeMap[name] = object.Size
@@ -71,15 +72,19 @@ func showSize(config s3Config) error {
 		}
 	}
 
-	format(root, childrenMap, sizeMap, 0)
+	format(root, childrenMap, sizeMap, 0, config.MaxDepth)
 
 	return nil
 }
 
-func format(rootNode string, childrenMap map[string][]string, sizeMap map[string]int64, depth int) {
+func format(rootNode string, childrenMap map[string][]string, sizeMap map[string]int64, depth int, maxDepth int) {
+	if depth >= maxDepth {
+		return
+	}
+
 	fmt.Printf("%-20s%s%s\n", formatSize(sizeMap[rootNode]), strings.Repeat(" ", depth*2), rootNode)
 	for _, child := range childrenMap[rootNode] {
-		format(child, childrenMap, sizeMap, depth+1)
+		format(child, childrenMap, sizeMap, depth+1, maxDepth)
 	}
 }
 
