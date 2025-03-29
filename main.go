@@ -44,12 +44,12 @@ func main() {
 		},
 		Action: func(ctx *cli.Context) error {
 			err := showSize(s3Config{
-				Endpoint:  ctx.String("endpoint"),
-				AccessKey: ctx.String("access-key"),
-				SecretKey: ctx.String("secret-key"),
-				UseSSL:    ctx.Bool("use-ssl"),
-				Bucket:    ctx.String("bucket"),
-				MaxDepth:  ctx.Int("max-depth"),
+				endPoint:  ctx.String("endpoint"),
+				accessKey: ctx.String("access-key"),
+				secretKey: ctx.String("secret-key"),
+				useSSL:    ctx.Bool("use-ssl"),
+				bucket:    ctx.String("bucket"),
+				maxDepth:  ctx.Int("max-depth"),
 			})
 			return err
 		},

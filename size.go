@@ -11,36 +11,33 @@ import (
 )
 
 type s3Config struct {
-	Endpoint  string
-	Bucket    string
-	AccessKey string
-	SecretKey string
-	UseSSL    bool
-	MaxDepth  int
+	endPoint  string
+	bucket    string
+	accessKey string
+	secretKey string
+	useSSL    bool
+	maxDepth  int
 }
-
-const (
-	root = "ROOT"
-)
 
 func showSize(config s3Config) error {
 	ctx := context.Background()
 
-	minioClient, err := minio.New(config.Endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(config.AccessKey, config.SecretKey, ""),
-		Secure: config.UseSSL,
+	minioClient, err := minio.New(config.endPoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(config.accessKey, config.secretKey, ""),
+		Secure: config.useSSL,
 	})
 
 	if err != nil {
 		return err
 	}
 
+	root := config.bucket
 	sizeMap := make(map[string]int64)
 	sizeMap[root] = 0
 
 	childrenMap := make(map[string][]string)
 
-	objectCh := minioClient.ListObjects(ctx, config.Bucket, minio.ListObjectsOptions{Recursive: true})
+	objectCh := minioClient.ListObjects(ctx, root, minio.ListObjectsOptions{Recursive: true})
 
 	for object := range objectCh {
 		if object.Err != nil {
@@ -72,19 +69,19 @@ func showSize(config s3Config) error {
 		}
 	}
 
-	format(root, childrenMap, sizeMap, 0, config.MaxDepth)
+	printSize(root, childrenMap, sizeMap, 0, config.maxDepth)
 
 	return nil
 }
 
-func format(rootNode string, childrenMap map[string][]string, sizeMap map[string]int64, depth int, maxDepth int) {
+func printSize(rootNode string, childrenMap map[string][]string, sizeMap map[string]int64, depth int, maxDepth int) {
 	if depth >= maxDepth {
 		return
 	}
 
 	fmt.Printf("%-20s%s%s\n", formatSize(sizeMap[rootNode]), strings.Repeat(" ", depth*2), rootNode)
 	for _, child := range childrenMap[rootNode] {
-		format(child, childrenMap, sizeMap, depth+1, maxDepth)
+		printSize(child, childrenMap, sizeMap, depth+1, maxDepth)
 	}
 }
 
@@ -94,7 +91,7 @@ func formatSize(size int64) string {
 		sizeUnit := math.Pow(1024, float64(i))
 		nextSizeUnit := math.Pow(1024, float64(i+1))
 		if size < int64(nextSizeUnit) {
-			return fmt.Sprintf("%.1f %s", float64(size)/sizeUnit, s)
+			return fmt.Sprintf("%.2f %s", float64(size)/sizeUnit, s)
 		}
 	}
 	return ""
