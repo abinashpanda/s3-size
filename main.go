@@ -10,7 +10,7 @@ import (
 func main() {
 	app := &cli.App{
 		Name:  "s3-size",
-		Usage: "cli tool to get the size of the s3 bucket and its container",
+		Usage: "cli tool to get the size of the s3 bucket and its objects (or directory)",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:     "endpoint",
@@ -34,12 +34,12 @@ func main() {
 			},
 			&cli.BoolFlag{
 				Name:  "use-ssl",
-				Usage: "use ssl for connecting to s3",
+				Usage: "use HTTPS connection when communicating with S3",
 				Value: false,
 			},
 			&cli.IntFlag{
 				Name:  "max-depth",
-				Usage: "max depth for showing the files size",
+				Usage: "print the size for a directory (or file, with --all) only if it is N or fewer levels below the command line argument",
 			},
 		},
 		Action: func(ctx *cli.Context) error {
